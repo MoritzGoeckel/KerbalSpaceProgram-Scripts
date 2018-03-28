@@ -25,7 +25,6 @@ set lastVelocity to V(0,0,0).
 set nextSamplingTime to 0.
 
 set state to "Initializing".
-set debug to "Initializing".
 
 WHEN TIME > nextSamplingTime THEN { 
 	
@@ -34,7 +33,6 @@ WHEN TIME > nextSamplingTime THEN {
 	print "vel   " + velocity:Z.
 	print "vel'  " + velocityDerivetive:Z.
 	print "state " + state.
-	print "debug " + debug.
 	
 	//Calculating velocityDerivetive
 	set velocityDerivetive to ((velocity - lastVelocity) / samplingDelay).	
@@ -42,26 +40,12 @@ WHEN TIME > nextSamplingTime THEN {
 	set nextSamplingTime to TIME + samplingDelay.	
 	
 	//Adjusting thrust
-	//In range
-	if 	velocity:Z < desiredSpeedZ + desiredSpeedZ * 0.01 and
-		velocity:Z > desiredSpeedZ - desiredSpeedZ * 0.01
+	if velocity:Z > desiredSpeedZ + desiredSpeedZ * 0.05 
+			or velocity:Z < desiredSpeedZ - desiredSpeedZ * 0.05
 	{
-		//Keep the speed
-		set state to "Keep vel".
-		if velocityDerivetive:Z > 0 {
-			set THROTTLE to THROTTLE - throttleStepsize.
-		}
-		else{
-			set THROTTLE to THROTTLE + throttleStepsize.
-		}
-	}
-	//Too high or too low
-	else if velocity:Z > desiredSpeedZ or velocity:Z < desiredSpeedZ
-	{
-		set state to "Too high or too low vel".
-		set requiredDerived to (desiredSpeedZ - velocity:Z) * 0.9.
+		set requiredDerived to (desiredSpeedZ - velocity:Z) * 0.7.
 		
-		set debug to "des " + desiredSpeedZ + "   reqDer   " + requiredDerived.
+		set state to "des " + desiredSpeedZ + "   reqDer   " + requiredDerived.
 		
 		if velocityDerivetive:Z > requiredDerived{
 			set THROTTLE to THROTTLE - throttleStepsize.
