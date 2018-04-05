@@ -1,56 +1,83 @@
-//This is KerboScript
-//See documentation here: https://ksp-kos.github.io/KOS/language
+lock velocity to SHIP:VELOCITY:SURFACE.
 
-//This is an basic script to get from launch pad into orbit on planet Kerbin
+LOCK STEERING TO HEADING(90, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
+set THROTTLE TO 0.
+
+set samplingDelay to 0.05.
+set throttleStepsize to 0.05.
 
 SET orbitSize TO 70000.
-SET speedLimitAlt TO 7000.
+SET speedLimitAlt TO 10000.
 SET etaApoBurnTime TO 20.
-SET maxVelSpeedLimit TO 200.
+
+set lastVelocity to V(0,0,0).
+set nextSamplingTime to 0.
+set velocityDerivetive to V(0,0,0).
+
+set steeringState TO "NONE".
+set thrustState TO "NONE".
+
+//SHIP:ALTITUDE
+
+set done to False.
 
 STAGE.
 
-CLEARSCREEN.
-
-SET MYTHROTTLE TO 1.0.
-LOCK THROTTLE TO MYTHROTTLE.
-
-LOCK MYSTEER TO HEADING(90, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
-LOCK STEERING TO MYSTEER.
-
-SET nextThrottleCheck TO TIME.
-
-UNTIL SHIP:PERIAPSIS > orbitSize{
+//Update loop
+WHEN TIME > nextSamplingTime THEN { 
+		
+	//Screen output
+	CLEARSCREEN.
+	print "vel      " + velocity:MAG.
+	print "vel'     " + velocityDerivetive:MAG.
+	print "thrust   " + thrustState.
+	print "steering " + steeringState.
+	print "alt      " + ALT:RADAR + " / " + SHIP:ALTITUDE.
 	
-	IF SHIP:ALTITUDE < speedLimitAlt AND TIME > nextThrottleCheck{
-		IF SHIP:VELOCITY:SURFACE:MAG > maxVelSpeedLimit{
-			SET MYTHROTTLE TO MYTHROTTLE - 0.001.
-		}.
-		ELSE IF MYTHROTTLE < 1.0 AND SHIP:VELOCITY:SURFACE:MAG < maxVelSpeedLimit{
-			SET MYTHROTTLE TO MYTHROTTLE + 0.001.
-		}.
-		SET nextThrottleCheck TO nextThrottleCheck + 0.01.
-	}.
+	if(SHIP:ALTITUDE < 7000){
+		set desiredSpeed to 200.
 	
-	IF SHIP:ALTITUDE > speedLimitAlt AND SHIP:APOAPSIS < orbitSize{
-		SET MYTHROTTLE TO 1.
+		//Calculating velocityDerivetive
+		set velocityDerivetive to ((velocity - lastVelocity) / samplingDelay).	
+		set lastVelocity to velocity.
+		set nextSamplingTime to TIME + samplingDelay.	
+		
+		//Adjusting thrust
+		set desiredDerived to desiredSpeed - velocity:Z.
+		set thrustState to "LIMITING to " + desiredSpeed.
+		
+		if velocityDerivetive:Z > desiredDerived{
+			set THROTTLE to MAX(THROTTLE - throttleStepsize, 0.1).
+			set thrustState to "- " + thrustState.
+		}
+		else if velocityDerivetive:Z < desiredDerived{
+			set THROTTLE to THROTTLE + throttleStepsize.
+			set thrustState to "+ " + thrustState.
+		}
 	}
-	
-	IF SHIP:APOAPSIS > orbitSize{
-		IF ETA:APOAPSIS > etaApoBurnTime AND ETA:APOAPSIS < 10 * 60{
-			SET MYTHROTTLE TO 0.
+	else{
+		if SHIP:APOAPSIS > orbitSize{
+			CLEARSCREEN.
+			PRINT "Rised APOAPSIS to " + orbitSize + "m".
+			set THROTTLE TO 0.
+			set done to True.
+			return False.
 		}
-		ELSE {
-			SET MYTHROTTLE TO 1.
+		else{
+			set thrustState to "FULL".
+			set THROTTLE TO 1.
 		}
-	}.
-	
+	}
+		
+	return True.
 }.
 
-PRINT "Orbiting in " + orbitSize + "m".
+WAIT UNTIL done.
 
 SET MYTHROTTLE TO 0.
 SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
 
 UNLOCK THROTTLE.
 UNLOCK STEERING.
+
+//circularize
