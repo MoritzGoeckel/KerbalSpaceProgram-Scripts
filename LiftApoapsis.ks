@@ -1,5 +1,5 @@
-parameter paramOrbitSize.
-parameter paramAngle.
+parameter orbitSize.
+parameter steeringAngle.
 
 LOCAL lock velocity to SHIP:VELOCITY:SURFACE.
 
@@ -8,7 +8,6 @@ set THROTTLE TO 0.
 LOCAL samplingDelay to 0.05.
 LOCAL throttleStepsize to 0.05.
 
-LOCAL orbitSize TO 70000.
 LOCAL speedLimitAlt TO 10000.
 LOCAL etaApoBurnTime TO 20.
 
@@ -18,24 +17,6 @@ LOCAL velocityDerivetive to V(0,0,0).
 
 LOCAL steeringState TO "NONE".
 LOCAL thrustState TO "NONE".
-
-LOCAL steeringAngle to 90.
-
-if defined paramOrbitSize{
-	set orbitSize to paramOrbitSize.
-	print "Using parameter for obritSize".
-}
-else{
-	print "No OrbitSize parameter found. Using " + orbitSize.
-}
-
-if defined paramAngle{
-	set steeringAngle to paramAngle.
-	print "Using parameter for SteeringAngle".
-}
-else{
-	print "No SteeringAngle parameter found. Using " + steeringAngle.
-}
 
 LOCK STEERING TO HEADING(steeringAngle, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
 

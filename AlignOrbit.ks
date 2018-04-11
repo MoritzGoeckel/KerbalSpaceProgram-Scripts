@@ -1,12 +1,5 @@
 parameter mytarget.
 
-if defined mytarget {
-	//Dont know how to check for false :D
-}
-else {
-	print "FATAL: No target param found!".
-}
-
 LOCAL myNode to NODE( TIME:SECONDS + 100, 0, 0, 0 ).
 
 ADD myNode.

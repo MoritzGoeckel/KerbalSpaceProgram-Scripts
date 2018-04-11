@@ -1,14 +1,4 @@
-parameter paramNode.
-
-LOCAL myNode to NEXTNODE.
-
-if defined paramNode{
-	print "Using parameter".
-	set myNode to paramNode.
-}
-else{
-	print "No param... using NEXTNODE".
-}
+parameter myNode.
 
 print "Executing node " + myNode.
 
@@ -16,14 +6,18 @@ LOCAL maxAccelaration to SHIP:MAXTHRUST/SHIP:MASS.
 LOCAL burnDuration to myNode:DELTAV:MAG/maxAccelaration.
 
 print "Locking steering".
-LOCK STEERING to myNode:DELTAV.
+local LOCK STEERING to myNode:DELTAV.
 
-print "Starting to THROTTLE for rotation".
-set THROTTLE to 0.01.
+//print "Starting to THROTTLE for rotation".
+//set THROTTLE to 0.005.
+
 wait until vang(myNode:DELTAV, SHIP:FACING:VECTOR) < 0.25.
 set THROTTLE to 0.
 
 print "Waiting for node minus " + (burnDuration/2) + "s".
+
+KUNIVERSE:TIMEWARP:WARPTO((time:seconds + (myNode:ETA - (burnDuration/2))) - 5).
+
 wait until myNode:ETA <= (burnDuration/2).
 
 LOCAL dv0 to myNode:DELTAV.
@@ -39,7 +33,7 @@ set THROTTLE to 0.
 
 print "Done executing node " + myNode.
 
-REMOVE myNode.
-
 UNLOCK THROTTLE.
 UNLOCK STEERING.
+
+REMOVE myNode.
