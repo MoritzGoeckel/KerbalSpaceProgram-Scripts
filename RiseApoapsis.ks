@@ -1,27 +1,45 @@
-lock velocity to SHIP:VELOCITY:SURFACE.
+parameter paramOrbitSize.
+parameter paramAngle.
 
-LOCK STEERING TO HEADING(90, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
+LOCAL lock velocity to SHIP:VELOCITY:SURFACE.
+
 set THROTTLE TO 0.
 
-set samplingDelay to 0.05.
-set throttleStepsize to 0.05.
+LOCAL samplingDelay to 0.05.
+LOCAL throttleStepsize to 0.05.
 
-SET orbitSize TO 70000.
-SET speedLimitAlt TO 10000.
-SET etaApoBurnTime TO 20.
+LOCAL orbitSize TO 70000.
+LOCAL speedLimitAlt TO 10000.
+LOCAL etaApoBurnTime TO 20.
 
-set lastVelocity to V(0,0,0).
-set nextSamplingTime to 0.
-set velocityDerivetive to V(0,0,0).
+LOCAL lastVelocity to V(0,0,0).
+LOCAL nextSamplingTime to 0.
+LOCAL velocityDerivetive to V(0,0,0).
 
-set steeringState TO "NONE".
-set thrustState TO "NONE".
+LOCAL steeringState TO "NONE".
+LOCAL thrustState TO "NONE".
 
-//SHIP:ALTITUDE
+LOCAL steeringAngle to 90.
 
-set done to False.
+if defined paramOrbitSize{
+	set orbitSize to paramOrbitSize.
+	print "Using parameter for obritSize".
+}
+else{
+	print "No OrbitSize parameter found. Using " + orbitSize.
+}
 
-STAGE.
+if defined paramAngle{
+	set steeringAngle to paramAngle.
+	print "Using parameter for SteeringAngle".
+}
+else{
+	print "No SteeringAngle parameter found. Using " + steeringAngle.
+}
+
+LOCK STEERING TO HEADING(steeringAngle, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
+
+LOCAL done to False.
 
 //Update loop
 WHEN TIME > nextSamplingTime THEN { 
@@ -35,7 +53,7 @@ WHEN TIME > nextSamplingTime THEN {
 	print "alt      " + ALT:RADAR + " / " + SHIP:ALTITUDE.
 	
 	if(SHIP:ALTITUDE < 7000){
-		set desiredSpeed to 200.
+		LOCAL desiredSpeed to 200.
 	
 		//Calculating velocityDerivetive
 		set velocityDerivetive to ((velocity - lastVelocity) / samplingDelay).	
@@ -43,7 +61,7 @@ WHEN TIME > nextSamplingTime THEN {
 		set nextSamplingTime to TIME + samplingDelay.	
 		
 		//Adjusting thrust
-		set desiredDerived to desiredSpeed - velocity:Z.
+		LOCAL desiredDerived to desiredSpeed - velocity:Z.
 		set thrustState to "LIMITING to " + desiredSpeed.
 		
 		if velocityDerivetive:Z > desiredDerived{
@@ -57,8 +75,6 @@ WHEN TIME > nextSamplingTime THEN {
 	}
 	else{
 		if SHIP:APOAPSIS > orbitSize{
-			CLEARSCREEN.
-			PRINT "Rised APOAPSIS to " + orbitSize + "m".
 			set THROTTLE TO 0.
 			set done to True.
 			return False.
@@ -74,10 +90,11 @@ WHEN TIME > nextSamplingTime THEN {
 
 WAIT UNTIL done.
 
-SET MYTHROTTLE TO 0.
-SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
-
 UNLOCK THROTTLE.
 UNLOCK STEERING.
 
-//circularize
+SET THROTTLE TO 0.
+SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
+
+CLEARSCREEN.
+PRINT "Rised APOAPSIS to " + orbitSize + "m".

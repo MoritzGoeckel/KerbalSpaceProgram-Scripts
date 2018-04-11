@@ -1,14 +1,23 @@
-lock velocity to SHIP:VELOCITY:SURFACE.
+local lock velocity to SHIP:VELOCITY:SURFACE.
 
 //Settings
-set samplingDelay to 0.05.
-set throttleStepsize to 0.01.
-set velTolerance to 0.05.
+local samplingDelay to 0.05.
+local throttleStepsize to 0.01.
+local velTolerance to 0.05.
 SAS OFF.
+
+//Internal variables
+
+local lastVelocity to V(0,0,0).
+local nextSamplingTime to 0.
+local velocityDerivetive to V(0,0,0).
+
+local thrustState to "Initializing".
+local steeringState to "Initializing".
 
 //Steering routine
 
-lock STEERING to getLandingSteering().
+local lock STEERING to getLandingSteering().
 function getLandingSteering {
 	if velocity:Z < -10 {
 		set steeringState to "Retrograde".
@@ -20,7 +29,7 @@ function getLandingSteering {
 
 //Speed routine
 
-lock desiredSpeedZ to getDesiredSpeedZ().
+local lock desiredSpeedZ to getDesiredSpeedZ().
 function getDesiredSpeedZ {
 	
 	//Define landing speed sequence here
@@ -70,15 +79,6 @@ SET velArrow TO VECDRAW(
 	0.2
 ).
 
-//Internal variables
-
-set lastVelocity to V(0,0,0).
-set nextSamplingTime to 0.
-set velocityDerivetive to V(0,0,0).
-
-set thrustState to "Initializing".
-set steeringState to "Initializing".
-
 //Update loop
 
 WHEN TIME > nextSamplingTime THEN { 
@@ -100,7 +100,7 @@ WHEN TIME > nextSamplingTime THEN {
 	if velocity:Z > desiredSpeedZ + desiredSpeedZ * velTolerance 
 			or velocity:Z < desiredSpeedZ - desiredSpeedZ * velTolerance
 	{
-		set requiredDerived to (desiredSpeedZ - velocity:Z).
+		local requiredDerived to (desiredSpeedZ - velocity:Z).
 		set thrustState to "desired " + desiredSpeedZ + " | desired' " + requiredDerived.
 		
 		if velocityDerivetive:Z > requiredDerived{
