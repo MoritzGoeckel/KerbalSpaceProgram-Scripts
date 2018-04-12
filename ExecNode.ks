@@ -13,16 +13,25 @@ declare global function executeNode {
 	print "Locking steering".
 	LOCK STEERING to execManeuvreNode:DELTAV.
 
-	RCS ON.
+	if(execManeuvreNode:DELTAV:MAG > 20){
+		RCS ON.
+	}
+	
 	wait until vang(execManeuvreNode:DELTAV, SHIP:FACING:VECTOR) < 0.25.
 	RCS OFF.
 
 	print "Waiting for node minus " + (burnDuration/2) + "s".
-	KUNIVERSE:TIMEWARP:WARPTO((time:seconds + (execManeuvreNode:ETA - (burnDuration/2))) - 5).
+	KUNIVERSE:TIMEWARP:WARPTO((time:seconds + (execManeuvreNode:ETA - (burnDuration/2))) - 10).
 	
-	RCS ON.
 	wait until execManeuvreNode:ETA <= (burnDuration/2).
 
+	if(execManeuvreNode:DELTAV:MAG > 20){
+		RCS ON.
+	}
+	
+	print "Waiting for vessel to align...".
+	wait until vang(execManeuvreNode:DELTAV, SHIP:FACING:VECTOR) < 0.25.
+	
 	print "Thrusting".
 	LOCAL dv0 to execManeuvreNode:DELTAV.
 	GLOBAL THROTTLE to burnScale.

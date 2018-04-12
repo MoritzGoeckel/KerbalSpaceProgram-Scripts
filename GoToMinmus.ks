@@ -1,10 +1,17 @@
-print "Starting way to minmus... ".
+RUNONCEPATH("ExecNode.ks").
 
-print "Executing RiseApoapsis.ks".
-RUN "RiseApoapsis.ks"(80 * 1000, 90).
+print "Starting way to Minmus... ".
 
-print "Executing Circularize.ks".
-RUN "Circularize.ks".
+print "Executing LiftApoapsis.ks".
+RUN "LiftApoapsis.ks"(80 * 1000, 90).
+
+print "Executing CircularizePeriapsis.ks".
+RUN "CircularizePeriapsis.ks".
 
 print "Executing AlignOrbit.ks".
 RUN "AlignOrbit.ks"(Minmus).
+
+print "Executing FindEncounter.ks".
+RUN "FindEncounter.ks"(Minmus).
+
+executeNode(NEXTNODE).

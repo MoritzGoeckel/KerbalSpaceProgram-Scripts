@@ -46,7 +46,7 @@ WHEN TIME > nextSamplingTime THEN {
 		set thrustState to "LIMITING to " + desiredSpeed.
 		
 		if velocityDerivetive:Z > desiredDerived{
-			set THROTTLE to MAX(THROTTLE - throttleStepsize, 0.1).
+			set THROTTLE to MAX(THROTTLE - throttleStepsize, 0.5). //To prevent flipping
 			set thrustState to "- " + thrustState.
 		}
 		else if velocityDerivetive:Z < desiredDerived{

@@ -1,5 +1,7 @@
 parameter mytarget.
 
+RUNONCEPATH("ExecNode.ks").
+
 LOCAL myNode to NODE( TIME:SECONDS + 100, 0, 0, 0 ).
 
 ADD myNode.
@@ -71,6 +73,6 @@ UNTIL False {
 	set lastDifference to difference. 
 }
 
-RUN "ExecNode.ks"(myNode).
+executeNode(myNode).
 
 print "Done".
