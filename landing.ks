@@ -17,7 +17,7 @@ local steeringState to "Initializing".
 
 //Steering routine
 
-local lock STEERING to getLandingSteering().
+lock STEERING to getLandingSteering().
 function getLandingSteering {
 	if velocity:Z < -10 {
 		set steeringState to "Retrograde".
