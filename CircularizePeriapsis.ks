@@ -1,3 +1,5 @@
+RUNONCEPATH("ExecNode.ks").
+
 LOCAL myNode to NODE( TIME:SECONDS+ETA:APOAPSIS, 0, 0, 0 ).
 
 ADD myNode.
@@ -14,6 +16,6 @@ print "Found circularizing manoeuvre".
 print "Needed DeltaV: " + delta.
 print myNode:ORBIT:PERIAPSIS + "  ->  " + myNode:ORBIT:APOAPSIS.
 
-RUN "ExecNode.ks"(myNode).
+executeNode(myNode).
 
 print "Done ".
