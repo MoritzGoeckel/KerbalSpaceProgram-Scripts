@@ -1,6 +1,13 @@
 declare global function executeNode {
 	parameter execManeuvreNode.
-
+	DECLARE PARAMETER heavyShip is False.
+	
+	local stopWarpingBefore to 10.
+	if(heavyShip){
+		print "Is a heavy ship!".
+		set stopWarpingBefore to 45.
+	}
+	
 	print "Executing node".
 
 	LOCAL maxAccelaration to SHIP:MAXTHRUST/SHIP:MASS.
@@ -21,13 +28,18 @@ declare global function executeNode {
 	RCS OFF.
 
 	print "Waiting for node minus " + (burnDuration/2) + "s".
-	KUNIVERSE:TIMEWARP:WARPTO((time:seconds + (execManeuvreNode:ETA - (burnDuration/2))) - 10).
+	KUNIVERSE:TIMEWARP:WARPTO((time:seconds + (execManeuvreNode:ETA - (burnDuration/2))) - stopWarpingBefore).
+	wait until execManeuvreNode:ETA <= (burnDuration/2) + stopWarpingBefore.
 	
-	wait until execManeuvreNode:ETA <= (burnDuration/2).
-
-	if(execManeuvreNode:DELTAV:MAG > 20){
+	if(execManeuvreNode:DELTAV:MAG > 20 or heavyShip){
 		RCS ON.
 	}
+
+	if(heavyShip){
+		set THROTTLE to 0.07.
+	}
+	
+	wait until execManeuvreNode:ETA <= (burnDuration/2).
 	
 	print "Waiting for vessel to align...".
 	wait until vang(execManeuvreNode:DELTAV, SHIP:FACING:VECTOR) < 0.25.

@@ -5,7 +5,7 @@ RUNONCEPATH("ExecNode.ks").
 
 print "Setting orbit size to " + orbitSize.
 
-local tolerance to 15/100*orbitSize.
+local tolerance to 5/100*orbitSize.
 local stepSize to 0.1.
 
 print "Tolerance is " + tolerance.
@@ -54,6 +54,7 @@ UNTIL done{
 		}
 		
 		executeNode(myNode).
+		set done to True.
 	}
 	//Problem
 	else if SHIP:ORBIT:APOAPSIS - tolerance > orbitSize{
@@ -68,9 +69,11 @@ UNTIL done{
 		}
 		
 		executeNode(myNode).
+		set done to True.
 	}
 	else{
-		print "Done".
 		set done to True.
 	}
 }
+
+print "Done".

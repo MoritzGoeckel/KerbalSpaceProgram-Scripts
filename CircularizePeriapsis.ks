@@ -15,7 +15,3 @@ UNTIL myNode:ORBIT:PERIAPSIS + myNode:ORBIT:PERIAPSIS * 0.05 >= myNode:ORBIT:APO
 print "Found circularizing manoeuvre".
 print "Needed DeltaV: " + delta.
 print myNode:ORBIT:PERIAPSIS + "  ->  " + myNode:ORBIT:APOAPSIS.
-
-executeNode(myNode).
-
-print "Done ".

@@ -8,6 +8,8 @@ RUN "LiftApoapsis.ks"(80 * 1000, 90).
 print "Executing CircularizePeriapsis.ks".
 RUN "CircularizePeriapsis.ks".
 
+executeNode(NEXTNODE, True).
+
 print "Executing AlignOrbit.ks".
 RUN "AlignOrbit.ks"(Minmus).
 
@@ -15,3 +17,5 @@ print "Executing FindEncounter.ks".
 RUN "FindEncounter.ks"(Minmus).
 
 executeNode(NEXTNODE).
+
+print "Done for now".
