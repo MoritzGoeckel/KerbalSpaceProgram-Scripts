@@ -1,72 +1,73 @@
-parameter orbitSize.
-parameter steeringAngle.
-
-LOCAL lock velocity to SHIP:VELOCITY:SURFACE.
-
-set THROTTLE TO 0.
+PARAMETER orbitSize.
+PARAMETER steeringAngle.
+DECLARE PARAMETER limitSpeed is True.
 
 LOCAL samplingDelay to 0.05.
 LOCAL throttleStepsize to 0.05.
+LOCAL minThrottle TO 0.2.
 
-LOCAL speedLimitAlt TO 10000.
-LOCAL etaApoBurnTime TO 20.
-
-LOCAL lastVelocity to V(0,0,0).
+LOCAL lastVelocity to 0.
 LOCAL nextSamplingTime to 0.
-LOCAL velocityDerivetive to V(0,0,0).
-
-LOCAL steeringState TO "NONE".
+LOCAL velocityDerivetive to 0.
 LOCAL thrustState TO "NONE".
-
-LOCK STEERING TO HEADING(steeringAngle, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
-
 LOCAL done to False.
+
+SET THROTTLE TO 0.
+LOCK STEERING TO HEADING(steeringAngle, MAX(90 - ((SHIP:APOAPSIS + 1) / orbitSize) * 90, 0)).
+LOCAL lock velocity to SHIP:AIRSPEED.
 
 //Update loop
 WHEN TIME > nextSamplingTime THEN { 
-		
-	//Screen output
-	CLEARSCREEN.
-	print "vel      " + velocity:MAG.
-	print "vel'     " + velocityDerivetive:MAG.
-	print "thrust   " + thrustState.
-	print "steering " + steeringState.
-	print "alt      " + ALT:RADAR + " / " + SHIP:ALTITUDE.
-	
-	if(SHIP:ALTITUDE < 7000){
-		LOCAL desiredSpeed to 200.
-	
-		//Calculating velocityDerivetive
-		set velocityDerivetive to ((velocity - lastVelocity) / samplingDelay).	
-		set lastVelocity to velocity.
-		set nextSamplingTime to TIME + samplingDelay.	
-		
-		//Adjusting thrust
-		LOCAL desiredDerived to desiredSpeed - velocity:Z.
-		set thrustState to "LIMITING to " + desiredSpeed.
-		
-		if velocityDerivetive:Z > desiredDerived{
-			set THROTTLE to MAX(THROTTLE - throttleStepsize, 0.5). //To prevent flipping
-			set thrustState to "- " + thrustState.
-		}
-		else if velocityDerivetive:Z < desiredDerived{
-			set THROTTLE to THROTTLE + throttleStepsize.
-			set thrustState to "+ " + thrustState.
-		}
-	}
-	else{
-		if SHIP:APOAPSIS > orbitSize{
-			set THROTTLE TO 0.
-			set done to True.
-			return False.
-		}
-		else{
-			set thrustState to "FULL".
-			set THROTTLE TO 1.
-		}
-	}
-		
-	return True.
+
+    //Screen output
+    CLEARSCREEN.
+    print "Vel         " + ROUND(velocity, 2).
+    print "Vel'        " + ROUND(velocityDerivetive, 2).
+    print "Thrust      " + thrustState.
+    print "tSteering   " + steeringAngle.
+    print "Alt S/R     " + ROUND(ALT:RADAR, 2) + " / " + ROUND(SHIP:ALTITUDE, 2).
+    print "Apo         " + ROUND(SHIP:APOAPSIS, 2).
+    print "tApo        " + orbitSize.
+
+    // Speed limit for less friction
+    LOCAL desiredSpeed to 99999999999.
+    if(limitSpeed){
+        if(SHIP:ALTITUDE < 6 * 1000){
+            SET desiredSpeed TO 200.
+        } else if(SHIP:ALTITUDE < 9 * 1000){
+            SET desiredSpeed TO 300.
+        } else if(SHIP:ALTITUDE < 11 * 1000){
+            SET desiredSpeed TO 350.
+        } else if(SHIP:ALTITUDE < 13 * 1000){
+            SET desiredSpeed TO 400.
+        }
+    }
+
+    //Calculating velocityDerivetive
+    set velocityDerivetive to ((velocity - lastVelocity) / samplingDelay).
+    set lastVelocity to velocity.
+    set nextSamplingTime to TIME + samplingDelay.
+
+    //Adjusting thrust
+    LOCAL desiredDerived to desiredSpeed - velocity.
+    set thrustState to "LIMITING to " + ROUND(desiredSpeed, 2).
+
+    if velocityDerivetive > desiredDerived{
+        set THROTTLE to MAX(THROTTLE - throttleStepsize, minThrottle). //To prevent flipping
+        set thrustState to "- " + thrustState.
+    }
+    else if velocityDerivetive < desiredDerived{
+        set THROTTLE to THROTTLE + throttleStepsize.
+        set thrustState to "+ " + thrustState.
+    }
+
+    if SHIP:APOAPSIS > orbitSize{
+        set THROTTLE TO 0.
+        set done to True.
+        return False.
+    }
+
+    return True.
 }.
 
 WAIT UNTIL done.

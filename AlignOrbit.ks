@@ -27,29 +27,29 @@ findAscDescNode(-5).
 
 LOCAL function findAscDescNode {
     declare local parameter normalDeltaV.
-	
-	print "Finding ac/dc node...".
-	print "Direction: " + normalDeltaV.
-	
-	LOCAL timeDelta to 1.
-	SET myNode:NORMAL to normalDeltaV.
-	UNTIL timeDelta >= Orbit:PERIOD  {
-		LOCAL difference to (normal_target - normal_me):MAG.
-		SET myNode:ETA to timeDelta.
-		
-		if difference < smallestDifference{
-			set smallestDifference to difference.
-			set smallestDifferenceETA to timeDelta.
-			set smallestDeltaV to normalDeltaV.
-			
-			//CLEARSCREEN.
-			//print "Diff: " + smallestDifference.
-			//print "ETA: " + smallestDifferenceETA.
-			//print "Normal: " + smallestDeltaV.
-		}
-		
-		set timeDelta to timeDelta + 10.
-	}
+
+    print "Finding ac/dc node...".
+    print "Direction: " + normalDeltaV.
+
+    LOCAL timeDelta to 1.
+    SET myNode:NORMAL to normalDeltaV.
+    UNTIL timeDelta >= Orbit:PERIOD  {
+        LOCAL difference to (normal_target - normal_me):MAG.
+        SET myNode:ETA to timeDelta.
+
+        if difference < smallestDifference{
+            set smallestDifference to difference.
+            set smallestDifferenceETA to timeDelta.
+            set smallestDeltaV to normalDeltaV.
+
+            //CLEARSCREEN.
+            //print "Diff: " + smallestDifference.
+            //print "ETA: " + smallestDifferenceETA.
+            //print "Normal: " + smallestDeltaV.
+        }
+
+        set timeDelta to timeDelta + 10.
+    }
 }
 
 SET myNode:ETA to smallestDifferenceETA.
@@ -62,15 +62,15 @@ print "Finding optimal normal burn...".
 print "Direction: " + dir.
 
 UNTIL False {
-	LOCAL difference to (normal_target - normal_me):MAG.
-		
-	if difference > lastDifference{
-		SET myNode:NORMAL to myNode:NORMAL - dir.
-		break.
-	}
-	
-	SET myNode:NORMAL to myNode:NORMAL + dir.
-	set lastDifference to difference. 
+    LOCAL difference to (normal_target - normal_me):MAG.
+
+    if difference > lastDifference{
+        SET myNode:NORMAL to myNode:NORMAL - dir.
+        break.
+    }
+
+    SET myNode:NORMAL to myNode:NORMAL + dir.
+    set lastDifference to difference. 
 }
 
 executeNode(myNode).
